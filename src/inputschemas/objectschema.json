@@ -1,0 +1,17 @@
+{
+    "inputobject" : {
+    "id": 1,
+    "name": "John Doe",
+    "age": 30,
+    "isStudent": false
+    }, 
+    "inputobject1" : {
+    "id": 2,
+    "name": "John De",
+    "age": 3,
+    "isStudent": false
+    }
+       
+}
+ 
+  
