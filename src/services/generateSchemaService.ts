@@ -2,24 +2,26 @@ import { readFileSync } from 'fs';
 import { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLBoolean} from 'graphql';
 
 const jsonFilePath = "./../inputschemas/objectschema.json"; 
-const jsonInput = readFileSync(jsonFilePath, 'utf8');
-const inputObject: { [key: string]: string } = JSON.parse(jsonInput);
 import { Field } from '../interfaces/fields';
+import { InputObject } from '../interfaces/InputObject';
 
-function getFirstKey(json : string): string {
-        const keys = Object.keys(inputObject);
-        return keys[0] ;
-}
-  
+// function getFirstKey(jsonString : string): string | null{
+//   try {
+//     const parsedData = JSON.parse(jsonString);
+//     const keys = Object.keys(parsedData);
+//     return keys.length > 0 ? keys[0] : null;
+//   } catch (error) {
+//     console.error('Error parsing JSON:', error);
+//     return null;
+//   }
+// }
 
-const firstKey = getFirstKey(jsonFilePath);
 
-function generateSchema(jsonObject : String){
-    
+function generateSchemaFromObject(jsonObject : InputObject, schemaName: any){
     const fields: Field = {};
     
-    for (const key in inputObject) {
-      const value = inputObject[key];
+    for (const key in jsonObject) {
+      const value = jsonObject[key];
       let type;
       
       if (typeof value === 'string') {
@@ -34,9 +36,28 @@ function generateSchema(jsonObject : String){
       
       fields[key] = { type};
     }
-
+    
     return new GraphQLObjectType({
-      name: firstKey,
+      name: schemaName,
       fields: () => fields,
     });
   }
+
+  export function generateSchemas(): GraphQLObjectType[] {
+    const jsonInput = readFileSync(jsonFilePath, 'utf8');
+    const schemaObjects = JSON.parse(jsonInput) as InputObject[]; 
+    
+    if (!schemaObjects || !Object.keys(schemaObjects).length) {
+      throw new Error('No schema objects found in the JSON file.');
+    }
+    
+    const allSchemas: GraphQLObjectType[] = [];
+    for (const [key,schemaObject] of Object.entries(schemaObjects)) {
+      const schemaName = key;
+      allSchemas.push(generateSchemaFromObject(schemaObject,schemaName));
+    }
+  
+    return allSchemas;
+  }
+  
+  
